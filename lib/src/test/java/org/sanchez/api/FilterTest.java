@@ -3,7 +3,6 @@ package org.sanchez.api;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -67,7 +66,34 @@ class FilterTest {
 
     @Test
     void notInvertsInnerFilter() {
-        Filter filter = Filter.not(Filter.falseValue());
+        Filter filter = Filter.and(
+                Filter.equalTo("role", "administrator"),
+                Filter.falseValue()
+        );
+
+        assertFalse(filter.matches(createUser()));
+        filter = Filter.not(filter);
+        assertTrue(filter.matches(createUser()));
+    }
+
+    @Test
+    void complexFilterTest() {
+        Filter filter = Filter.and(
+                Filter.or(
+                        Filter.falseValue(),
+                        Filter.equalTo("role", "read_only"),
+                        Filter.greaterThan("firstname", "Bob")
+                ),
+                Filter.trueValue(),
+                Filter.not(
+                        Filter.and(
+                                Filter.falseValue(),
+                                Filter.equalTo("surname", "Bloggs")
+                        )
+                ),
+                Filter.present("age"),
+                Filter.regexMatches("role", "^admin.*")
+        );
         assertTrue(filter.matches(createUser()));
     }
 }
