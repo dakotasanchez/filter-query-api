@@ -1,6 +1,5 @@
 package org.sanchez.api;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -117,7 +116,7 @@ public sealed interface Filter {
             case GreaterThan gt -> {
                 final String resourceVal = resource.get(gt.attribute());
                 try {
-                    yield Double.parseDouble(resourceVal) > Double.parseDouble(gt.value());
+                    yield resourceVal != null && Double.parseDouble(resourceVal) > Double.parseDouble(gt.value());
                 } catch (NumberFormatException e) {
                     yield resourceVal.compareToIgnoreCase(gt.value()) > 0;
                 }
@@ -125,7 +124,7 @@ public sealed interface Filter {
             case LessThan lt -> {
                 final String resourceVal = resource.get(lt.attribute());
                 try {
-                    yield Double.parseDouble(resourceVal) < Double.parseDouble(lt.value());
+                    yield resourceVal != null && Double.parseDouble(resourceVal) < Double.parseDouble(lt.value());
                 } catch (NumberFormatException e) {
                     yield resourceVal.compareToIgnoreCase(lt.value()) < 0;
                 }
@@ -139,7 +138,7 @@ public sealed interface Filter {
     }
 
     /**
-     * Creates a {@link String} representation of this filter expression.
+     * Creates a user-friendly {@link String} representation of this filter expression.
      *
      * @return the {@link String} representation
      */
@@ -160,5 +159,27 @@ public sealed interface Filter {
             case GreaterThan gt -> "(" + gt.attribute() + " > \"" + gt.value() + "\")";
             case RegexMatches m -> "(" + m.attribute() + " MATCHES \"" + m.expression() + "\")";
         };
+    }
+
+    /**
+     * Creates a {@link Filter} from the supplied filter expression.
+     *
+     * @return the constructed {@link Filter}
+     */
+    static Filter fromFilterString(String filterString) {
+        // TODO create a parser
+        // 1. Change filter strings from a user-friendly representation to something that's easier to parse (i.e. a clean prefix notation)
+        // 2. Implement a sort of recursive parsing algorithm, peeking at the operators to determine how to parse the groupings
+        // 3. Parse until no more tokens, taking care to handle malformed strings
+        //
+        // i.e.
+        // parse():
+        //   if 'true' return new True()
+        //   if 'false' return new False()
+        //   parse open parens, peek at operator (one of [&&, ||, !, >, <, ==, exists, matches])
+        //   switch() on the operator, and parse() the children if a grouping [&&, ||, !], or parse tokens and return
+        //      the filter type if simple operands [>, <, ==, exists, matches]
+
+        return null;
     }
 }
