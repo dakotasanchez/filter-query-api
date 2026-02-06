@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public sealed interface Filter {
 
-    static final String REGEX_CASE_INSENSITIVE = "(?i)";
+    String REGEX_CASE_INSENSITIVE = "(?i)";
 
     // Boolean literals
     record True() implements Filter {}
@@ -88,9 +88,9 @@ public sealed interface Filter {
             case LessThan lessThan -> {
                 final String resourceVal = resource.get(lessThan.attribute());
                 try {
-                    yield Double.parseDouble(resourceVal) > Double.parseDouble(lessThan.value());
+                    yield Double.parseDouble(resourceVal) < Double.parseDouble(lessThan.value());
                 } catch (NumberFormatException e) {
-                    yield resourceVal.compareToIgnoreCase(lessThan.value()) > 0;
+                    yield resourceVal.compareToIgnoreCase(lessThan.value()) < 0;
                 }
             }
             case Present present -> resource.containsKey(present.attribute());
