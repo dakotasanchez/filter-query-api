@@ -110,7 +110,8 @@ class FilterTest {
             "age, 30, true",
             "age, 35, false",
             "age, 40, false",
-            "age, 8, true"
+            "age, 8, true",
+            "age, notanumber, false"
     })
     void greaterThanComparesNumerically(String attribute, String value, boolean expected) {
         Filter filter = Filter.greaterThan(attribute, value);
@@ -122,7 +123,8 @@ class FilterTest {
             "age, 40, true",
             "age, 35, false",
             "age, 30, false",
-            "age, 8, false"
+            "age, 8, false",
+            "age, notanumber, true"
     })
     void lessThanComparesNumerically(String attribute, String value, boolean expected) {
         Filter filter = Filter.lessThan(attribute, value);
