@@ -1,8 +1,9 @@
 package org.sanchez.api;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * A filter that determines whether a resource matches a set of criteria.
@@ -109,31 +110,55 @@ public sealed interface Filter {
             case And and -> and.filters().stream().allMatch(f -> f.matches(resource));
             case Or or -> or.filters().stream().anyMatch(f -> f.matches(resource));
             case Not not -> !not.filter().matches(resource);
-            case EqualTo equalTo -> {
-                final String resourceVal = resource.get(equalTo.attribute());
-                yield resourceVal != null && resourceVal.equalsIgnoreCase(equalTo.value());
+            case EqualTo eq -> {
+                final String resourceVal = resource.get(eq.attribute());
+                yield resourceVal != null && resourceVal.equalsIgnoreCase(eq.value());
             }
-            case GreaterThan greaterThan -> {
-                final String resourceVal = resource.get(greaterThan.attribute());
+            case GreaterThan gt -> {
+                final String resourceVal = resource.get(gt.attribute());
                 try {
-                    yield Double.parseDouble(resourceVal) > Double.parseDouble(greaterThan.value());
+                    yield Double.parseDouble(resourceVal) > Double.parseDouble(gt.value());
                 } catch (NumberFormatException e) {
-                    yield resourceVal.compareToIgnoreCase(greaterThan.value()) > 0;
+                    yield resourceVal.compareToIgnoreCase(gt.value()) > 0;
                 }
             }
-            case LessThan lessThan -> {
-                final String resourceVal = resource.get(lessThan.attribute());
+            case LessThan lt -> {
+                final String resourceVal = resource.get(lt.attribute());
                 try {
-                    yield Double.parseDouble(resourceVal) < Double.parseDouble(lessThan.value());
+                    yield Double.parseDouble(resourceVal) < Double.parseDouble(lt.value());
                 } catch (NumberFormatException e) {
-                    yield resourceVal.compareToIgnoreCase(lessThan.value()) < 0;
+                    yield resourceVal.compareToIgnoreCase(lt.value()) < 0;
                 }
             }
-            case Present present -> resource.containsKey(present.attribute());
-            case RegexMatches regexMatches -> {
-                final String resourceVal = resource.get(regexMatches.attribute());
-                yield resourceVal != null && resourceVal.matches(REGEX_CASE_INSENSITIVE + regexMatches.expression());
+            case Present p -> resource.containsKey(p.attribute());
+            case RegexMatches regex -> {
+                final String resourceVal = resource.get(regex.attribute());
+                yield resourceVal != null && resourceVal.matches(REGEX_CASE_INSENSITIVE + regex.expression());
             }
+        };
+    }
+
+    /**
+     * Creates a {@link String} representation of this filter expression.
+     *
+     * @return the {@link String} representation
+     */
+    default String toFilterString() {
+        return switch (this) {
+            case True t -> "true";
+            case False f -> "false";
+            case And and -> "(" + and.filters().stream()
+                    .map(Filter::toFilterString)
+                    .collect(Collectors.joining(" && ")) + ")";
+            case Or or -> "(" + or.filters().stream()
+                    .map(Filter::toFilterString)
+                    .collect(Collectors.joining(" || ")) + ")";
+            case Not not -> "!" + not.filter().toFilterString();
+            case Present p -> "(" + p.attribute() + " EXISTS)";
+            case EqualTo eq -> "(" + eq.attribute() + " == \"" + eq.value() + "\")";
+            case LessThan lt -> "(" + lt.attribute() + " < \"" + lt.value() + "\")";
+            case GreaterThan gt -> "(" + gt.attribute() + " > \"" + gt.value() + "\")";
+            case RegexMatches m -> "(" + m.attribute() + " MATCHES \"" + m.expression() + "\")";
         };
     }
 }

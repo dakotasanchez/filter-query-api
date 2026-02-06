@@ -95,6 +95,14 @@ class FilterTest {
                 Filter.regexMatches("role", "^admin.*")
         );
         assertTrue(filter.matches(createUser()));
+
+        String expected = "((false || (role == \"read_only\") || (firstname > \"Bob\")) " +
+                "&& true " +
+                "&& !(false && (surname == \"Bloggs\")) " +
+                "&& (age EXISTS) " +
+                "&& (role MATCHES \"^admin.*\"))";
+        String filterString = filter.toFilterString();
+        assertEquals(expected, filterString);
     }
 
     @ParameterizedTest
