@@ -96,4 +96,41 @@ class FilterTest {
         );
         assertTrue(filter.matches(createUser()));
     }
+
+    @ParameterizedTest
+    @CsvSource({
+            "age, 30, true",
+            "age, 35, false",
+            "age, 40, false",
+            "age, 8, true"
+    })
+    void greaterThanComparesNumerically(String attribute, String value, boolean expected) {
+        Filter filter = Filter.greaterThan(attribute, value);
+        assertEquals(expected, filter.matches(createUser()));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "age, 40, true",
+            "age, 35, false",
+            "age, 30, false",
+            "age, 8, false"
+    })
+    void lessThanComparesNumerically(String attribute, String value, boolean expected) {
+        Filter filter = Filter.lessThan(attribute, value);
+        assertEquals(expected, filter.matches(createUser()));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "firstname, J.*, true",
+            "firstname, j.*, true",
+            "firstname, ^Joe$, true",
+            "firstname, ^Bob$, false",
+            "surname, B.*s, true",
+    })
+    void regexMatchesWithVariousPatterns(String attribute, String pattern, boolean expected) {
+        Filter filter = Filter.regexMatches(attribute, pattern);
+        assertEquals(expected, filter.matches(createUser()));
+    }
 }
