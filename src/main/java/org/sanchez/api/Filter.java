@@ -77,7 +77,7 @@ public sealed interface Filter {
 
     /**
      * Returns a filter that matches if the resource value is less than the supplied value.
-     * Numeric values are compared numerically. Non-numeric values fall back to lexicographical comparison.
+     * Numeric values are compared numerically (only if both are numeric). Non-numeric values fall back to lexicographical comparison.
      */
     static Filter lessThan(final String attribute, final String value) {
         return new LessThan(attribute, value);
@@ -85,7 +85,7 @@ public sealed interface Filter {
 
     /**
      * Returns a filter that matches if the resource value is greater than the supplied value.
-     * Numeric values are compared numerically. Non-numeric values fall back to lexicographical comparison.
+     * Numeric values are compared numerically (only if both are numeric). Non-numeric values fall back to lexicographical comparison.
      */
     static Filter greaterThan(final String attribute, final String value) {
         return new GreaterThan(attribute, value);
